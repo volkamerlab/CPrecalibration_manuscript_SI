@@ -1,4 +1,4 @@
-# Studying and mitigating the effects of data drifts onML model performance at the example of chemicaltoxicity data 
+# Studying and mitigating the effects of data drifts on ML model performance, the example of chemicaltoxicity data 
 
 Andrea Morger, Marina Garcia de Lomana, Ulf Norinder, Fredrik Svensson, Johannes Kirchmair, Miriam Mathea, and Andrea Volkamer
 
