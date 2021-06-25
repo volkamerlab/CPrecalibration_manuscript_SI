@@ -62,31 +62,33 @@ The notebook may be adapted to use the code for different datasets.
 2. Install the [Anaconda](
 https://docs.anaconda.com/anaconda/install/) (large download) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html) (lighter) distribution for clean package version management.
 
-3. Use the package manager `conda` to create an environment (called `chembio_si`) for the notebooks. You can either use the provided `environment.yml` with which to automatically install all required dependencies (3a, recommended) 
+3. Use the package manager `conda` to create an environment (called `recalibration_si`) for the notebooks. You can either use the provided `environment.yml` with which to automatically install all required dependencies (3a, recommended) 
 or start with an empty environment (3b) and install the required libraries manually (5).
 
     * a) Create a conda environment including all dependencies with 
 `conda env create -f environment.yml`
 
     * b) If you prefer to build your own environment, start with 
-`conda create --name chembio_si python=3.8`
+`conda create --name recalibration_si python=3.8`
    
 
-4. Activate the conda environment: `conda activate chembio_si`
+4. Activate the conda environment: `conda activate recalibration_si`
 
 5. Install packages (only required together with 3b): 
     * If you successfully created your environment from the `environment.yml` file (3a), this step 5 can be skipped. 
     * If you started with your own environment (3b), continue by installing the following libraries: 
 
-        `conda install jupyter`
+        
     
         `conda install pandas`
     
         `conda install matplotlib`
     
-        `conda install -c conda-forge scikit-learn`
+        `conda install -c conda-forge scikit-learn=0.22.2`
     
         `pip install https://github.com/morgeral/nonconformist/archive/master.zip`
+        
+        `conda install -c conda-forge notebook`
         
 
 ## License
