@@ -545,9 +545,9 @@ class ContinuousCalibrationAggregatedConformalPredictor(AggregatedConformalPredi
     def calibrate_update(self, X_update, y_update):
         n = 1
         while f"update_{n}" in self.predictors_calibrated_update:
-            print('n', n)
+#             print('n', n)
             n += 1
-        print('final n: ', n)
+#         print('final n: ', n)
         self.predictors_calibrated_update[f"update_{n}"] = []
         for predictor_fitted in self.predictors_fitted:
             predictor_calibration_update = copy.deepcopy(predictor_fitted)
@@ -568,7 +568,7 @@ class ContinuousCalibrationAggregatedConformalPredictor(AggregatedConformalPredi
         return predictions
 
     def predict_calibrate_update(self, updated_number, X_score=None):
-        print('updated_number: ', updated_number)
+#         print('updated_number: ', updated_number)
         predictions = np.dstack(
             [
                 self._f(p, X_score)
@@ -626,7 +626,7 @@ class CrossValidator:
         samples = self.sampler.gen_samples(labels=y_train)
 
         for fold, train, test in samples:
-            print('fold: ', fold)
+#             print('fold: ', fold)
             self.train_indices.append(list(train))
             self.test_indices.append(list(test))
 
@@ -672,15 +672,15 @@ class CrossValidator:
                 steps=steps,
                 class_wise=class_wise_evaluation,
             )
-        print("YSCORE", type(y_score), "++++++++++++++++++++++++++++++++")
-        print(type(cv_y_test[0]))
+#         print("YSCORE", type(y_score), "++++++++++++++++++++++++++++++++")
+#         print(type(cv_y_test[0]))
         self._evaluation_dfs["cv"] = pd.DataFrame(cv_evaluations)
         self._evaluation_dfs["pred_score"] = pd.DataFrame(pred_score_evaluations)
 
         self._predictions["cv"] = [cv_predictions, cv_y_test]
         self._predictions["pred_score"] = [pred_score_predictions, np.tile(y_score, ((fold+1), 1))]
-        print(type(self._predictions["pred_score"][1]))
-        print(self._predictions["pred_score"][1])
+#         print(type(self._predictions["pred_score"][1]))
+#         print(self._predictions["pred_score"][1])
 
         # fixme: is len y_score ok or do need n times y_score?
         self.predictors = predictors
@@ -697,7 +697,7 @@ class CrossValidator:
         evaluations = self._create_empty_evaluations_dict()
 
         for fold, predictor in enumerate(predictors):
-            print('fold: ', fold)
+#             print('fold: ', fold)
             n = predictor.calibrate_update(X_update, y_update)
             cal_update_predictors.append(predictor)
             prediction = predictor.predict_calibrate_update(n, X_score=X_score)
@@ -896,13 +896,13 @@ class CrossValidator:
 
     @staticmethod
     def _format_predictions_df(predictions, names):
-        print("FORMATTING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print(len(predictions))
+#         print("FORMATTING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+#         print(len(predictions))
         # print((predictions[0]))
-        print("1", type(predictions[1]), (predictions[1]))
+#         print("1", type(predictions[1]), (predictions[1]))
         pred_dfs = []
         for i, pred in enumerate(predictions[0]):
-            print(i)
+#             print(i)
             pred_df = pd.DataFrame(data=predictions[0][i])
             pred_df["true"] = predictions[1][i]
             if names is not None:
