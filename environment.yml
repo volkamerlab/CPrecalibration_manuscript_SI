@@ -1,0 +1,13 @@
+name: recalibration_si
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - matplotlib=3.4.2=py38h578d9bd_0
+  - notebook=6.4.0=pyha770c72_0
+  - pandas=1.2.5=py38h1abd341_0
+  - pip=21.1.2=pyhd8ed1ab_0
+  - scikit-learn=0.22.2.post1=py38hcdab131_0
+  - pip:
+    - https://github.com/morgeral/nonconformist/archive/master.zip
+
