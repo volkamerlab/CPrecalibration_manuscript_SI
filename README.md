@@ -90,6 +90,8 @@ or start with an empty environment (3b) and install the required libraries manua
         
         `conda install -c conda-forge notebook`
         
+        `conda install -c conda-forge umap-learn`
+        
 
 ## License
 (Back to [Table of contents](#table-of-contents))
