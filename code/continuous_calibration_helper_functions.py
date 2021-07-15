@@ -16,6 +16,8 @@ from sklearn.model_selection import StratifiedShuffleSplit
 
 from nonconformist.nc import InverseProbabilityErrFunc, NcFactory
 
+import umap
+
 from continuous_calibration import (
     StratifiedRatioSampler,
     BalancedStratifiedRatioSampler,
@@ -946,6 +948,136 @@ def get_time_split_dict(
 def cm2inch(cm):
     inch = 2.54
     return cm / inch
+
+
+def draw_scatter_plot_one_endpoint(
+        endpoint,
+        evaluation_dfs_dict,
+        evaluation_measures,
+        colours=("navy", "green", "plum"),
+        marker_styles=("o", "x", "+", "v"),
+        significance_level=0.2,
+
+):
+    plt.clf()
+    plt.rc("xtick", labelsize=12)
+    plt.rc("ytick", labelsize=12)
+    plt.rc("legend", fontsize=12)
+
+    measures_map_dict = {"validity_bal": "balanced validity",
+                         "efficiency_bal": "balanced efficiency",
+                         "accuracy_bal": "balanced accuracy",
+                         }
+
+    eval_legend = []
+    for em in evaluation_measures:
+        if em in measures_map_dict.keys():
+            eval_legend.append(measures_map_dict[em])
+        else:
+            eval_legend.append(em)
+
+        # Prepare data for plot, i.e. eval measure for each strategy
+        measure_dict_sl = {"strategies": []}
+        for meas in evaluation_measures:
+            measure_dict_sl[meas] = []
+
+        for strategy, df in evaluation_dfs_dict.items():
+            measure_dict_sl["strategies"].append(strategy)
+            df_sl = df[df["significance_level"] == significance_level]
+            for meas in evaluation_measures:
+                measure_dict_sl[meas].append(df_sl[f"{meas} mean"].values)
+
+        strategies = measure_dict_sl["strategies"]
+
+        labels_map_dict = {"cv_original": "cv",
+                           "original": "cal_original",  # pred_holdout\n
+                           "update1": "cal_update1",  # pred_holdout\n
+                           "update2": "cal_update2",  # pred_holdout\n
+                           }
+
+        labels = [labels_map_dict[l] for l in strategies]
+
+        for m, meas in enumerate(evaluation_measures):
+            plt.scatter(
+                strategies,
+                measure_dict_sl[meas],
+                color=colours[m],
+                marker=marker_styles[m]
+            )
+
+        plt.hlines(0.8, 0, 2, linestyle="dashed")
+        plt.xticks(np.arange(len(labels)), labels=labels, rotation=30, ha="right")
+        plt.ylim(-0.05, 1.05)
+
+        title = f"{endpoint}\n"
+        plt.title(title, fontsize=14)
+
+    lgd = plt.legend(eval_legend, loc='upper center', bbox_to_anchor=(0.5, 0.5), ncol=1, columnspacing=0.5,
+                     numpoints=3)
+
+    plt.tight_layout(rect=[0, 0.03, 0.9, 0.95])
+
+    evaluation_measures = "_".join([em for em in evaluation_measures])
+
+    return plt, lgd
+
+
+def create_umap_data(
+        chembl_id, descriptors_df, thresholds, dataset_colours, n_neighbors, min_distances, distance_metric,
+        descriptors="chembio"
+):
+
+    descriptors_df = descriptors_df.dropna(subset=["year"])
+
+    colours_numbers = descriptors_df["year"].apply(
+        lambda x: colour_by_year(
+            x, thresholds[0], thresholds[1], thresholds[2], colours=dataset_colours
+        )
+    )
+
+    # Define columns used as descriptors (depending on the descriptor type, i.e. chem, bio or chembio)
+    columns = columns_per_descriptor(
+        descriptors_df.columns, descriptors, chembl_id
+    )
+    descriptors_df = descriptors_df[columns]
+    all_descriptors = descriptors_df.values
+
+    # Create embedding of UMAP fitted on all datapoints
+    embedding = umap.UMAP(
+        n_neighbors=n_neighbors,
+        min_dist=min_distances,
+        metric=distance_metric,
+        random_state=42  # Set random seed for reproducibility
+    ).fit_transform(X=all_descriptors)
+
+    return embedding, colours_numbers
+
+
+def plot_umap(embedding, endpoint,
+              colours_datasets,
+              umap_colours,
+              n_neighbor,
+              min_distance,
+              distance_metric,
+              figsize=(17, 17), ):
+    colours = colours_datasets
+    print(len(colours))
+
+    plt.figure(figsize=(cm2inch(figsize[0]), cm2inch(figsize[1])))
+    plt.scatter(
+        embedding[:, 0], embedding[:, 1], label=None, c=colours, s=10, alpha=0.5
+    )
+    plt.title(endpoint, fontsize=16)
+
+    plt.xticks(size=16)
+    plt.yticks(size=16)
+    #     plt.rc('ytick', labelsize=small_size)
+    #     plt.rc('legend', fontsize=small_size)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+
+    markers = [plt.Line2D([0, 0], [0, 0], color=colour, marker='o', linestyle='') for colour in umap_colours]
+    plt.legend(markers, ["training set", "update1 set", "update2 set", "holdout set"], numpoints=1, loc="upper right")
+    return plt
 
 
 def draw_line_plot_more_datasets(
