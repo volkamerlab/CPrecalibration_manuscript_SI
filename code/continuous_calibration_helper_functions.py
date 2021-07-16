@@ -619,6 +619,92 @@ def draw_calibration_plot_more_endpoints(
     return plt, lgd
 
 
+mini_size = 8  # 12
+small_size = 10  # 14
+medium_size = 10  # 16
+
+
+def boxplot_val_eff_acc_quer(
+        evaluation_dfs,
+        measures,
+        significance_level,
+        map_labels=False, fig_height=8.5, fig_width=17):
+    """
+    Make same plot but subplots next to each other instead of underneath
+    """
+
+    measure_dict_sl = {}
+    for exp, dfs in evaluation_dfs.items():
+
+        measure_dict_sl[exp] = {}
+        for measure in measures:
+            measure_dict_sl[exp][measure] = np.array([])
+        for ep_df in dfs:
+            ep_df_sl = ep_df[ep_df["significance_level"] == significance_level]
+            for measure in measures:
+                measure_dict_sl[exp][measure] = np.append(
+                    measure_dict_sl[exp][measure],
+                    ep_df_sl[f"{measure} mean"].values)
+
+    experiments = evaluation_dfs.keys()
+
+    if map_labels:
+        labels_map_dict = {"cv_original": "cv",
+                           "original": "cal_original",  # pred_holdout\n
+                           "update": "iii",
+                           "update1": "cal_update1",  # pred_holdout\n
+                           "update2": "cal_update2",  # pred_holdout\n
+                           "update12": "cal_update1_and_2",  # pred_holdout\n
+                           }
+        labels = [labels_map_dict[k] for k in experiments]
+    else:
+        labels = experiments
+
+    boxprops = dict(linewidth=2)
+    whiskerprops = dict(linewidth=2)
+    capprops = dict(linewidth=2)
+    medianprops = dict(linewidth=2, color='darkred')
+    flierprops = dict(linewidth=2, markeredgecolor='darkred', markeredgewidth=2)
+
+    plt.clf()
+    fig, axs = plt.subplots(ncols=3)
+
+    fig.set_figheight(cm2inch(fig_height))
+    fig.set_figwidth(cm2inch(fig_width))
+    plt.rc('xtick', labelsize=small_size)
+    plt.rc('ytick', labelsize=small_size)
+    plt.rc('legend', fontsize=small_size)
+    yax = 0
+
+    measures_map_dict = {"validity_bal": "Balanced validity", "efficiency_bal": "Balanced efficiency",
+                         "accuracy_bal": "Balanced accuracy",
+                         "validity_0": "Validity\n inactive class", "efficiency_0": "Efficiency\n inactive class",
+                         "accuracy_0": "Accuracy\n inactive class", "validity_1": "Validity\n active class",
+                         "efficiency_1": "Efficiency\n active class", "accuracy_1": "Accuracy\n active class"}
+
+    for measure in measures:
+        axs[yax].hlines(0.8, 1, len(experiments), linestyle="dashed")
+        axs[yax].boxplot(
+            [measure_dict_sl[exp][measure] for exp in experiments], labels=labels,
+            widths=0.75, boxprops=boxprops,
+            whiskerprops=whiskerprops, capprops=capprops, medianprops=medianprops, flierprops=flierprops,
+        )
+        axs[yax].set_xticklabels(labels, rotation=30, fontsize=small_size, ha="right")  # )"vertical")
+        axs[yax].set_ylim(0.0, 1.0)
+
+        if measure in measures_map_dict.keys():
+            measure_title = measures_map_dict[measure]
+        else:
+            measure_title = measure
+        axs[yax].set_title(measure_title, fontsize=small_size)
+
+        yax += 1
+
+    plt.tight_layout(h_pad=1, w_pad=1)
+
+    return plt
+
+
 def boxplot_and_df_for_eval_measure(
         evaluation_dfs,
         measure,

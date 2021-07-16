@@ -2,7 +2,7 @@
 
 This repository is part of the supporting information to the manuscript in preparation:
 
-** Studying and mitigating the effects of data drifts on ML model performance the example of chemical toxicity data **
+** Studying and mitigating the effects of data drifts on ML model performance at the example of chemical toxicity data **
 
 Andrea Morger, Marina Garcia de Lomana, Ulf Norinder, Fredrik Svensson, Johannes Kirchmair, Miriam Mathea, and Andrea Volkamer
 
@@ -23,22 +23,23 @@ A strategy to continuously update models to make reliable predictions for novel 
 
 ### Folder Structure
 (Back to [Table of contents](#table-of-contents))
-- data: input data
-- results: output data
-- scripts: python scripts
-- notebooks: Ipython notebooks
+- data: input data for ChEMBL228
+- scripts: python scripts and example jupyter notebooks
+Note that due to the size of the ChEMBL datasets with the chembio descriptors, only one dataset is provided with this GitHub repo. This is sufficient to run the `continuous_calibration_example` notebook. To be able to run both example notebooks, download the compressed file with data for all ChEMBL endpoints used in this work from Zenodo.
+
 
 ## Data and Methods
 (Back to [Table of contents](#table-of-contents))
 
-The ChEMBL datasets used in these notebooks were downloaded from the ChEMBL database vNational Center for Advancing Translational Sciences:
-https://tripod.nih.gov/tox21/challenge/data.jsp (downloaded 29.1.2019)
+The ChEMBL datasets used in these notebooks were downloaded from the ChEMBL database version 26
 
-* The molecules were standardised as described in the manuscript (*Data and Methods*)
+* The molecules were standardised as described in the manuscript (*Data and Methods*) in a KNIME workflow
+    * Remove solvents and salts
+    * Annotate aromaticity
+    * Neutralise charges
+    * Mesomerise structures 
     * Remove duplicates
-    * Use [`standardiser`](https://github.com/flatkinson/standardiser) library (discard non-organic compounds, apply structure standardisation rules, neutralise, remove salts)
-    * Remove small fragments and remaining mixtures
-    * Remove duplicates
+    
 
 ## Usage
 (Back to [Table of contents](#table-of-contents))
@@ -48,8 +49,6 @@ The notebooks can be used to train aggregated conformal predictors on the provid
 The notebook may be adapted to use the code for different datasets. 
 
 ### Installation
-
-!!! [todo] - upload environment.yml, check if required libraries are complete
 
 1. Get your local copy of the `CPrecalibration_manuscript_si` repository by:
     * Downloading it as a [Zip archive](https://github.com/volkamerlab/cprecalibration_manuscript_si/archive/master.zip) and unzipping it, or
@@ -62,7 +61,7 @@ The notebook may be adapted to use the code for different datasets.
 2. Install the [Anaconda](
 https://docs.anaconda.com/anaconda/install/) (large download) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html) (lighter) distribution for clean package version management.
 
-3. Use the package manager `conda` to create an environment (called `recalibration_si`) for the notebooks. You can either use the provided `environment.yml` with which to automatically install all required dependencies (3a, recommended) 
+3. Use the package manager `conda` to create an environment (called `recalibration_si`) for the notebooks. You can either use the provided `environment.yml` with which you can automatically install all required dependencies (3a, recommended) 
 or start with an empty environment (3b) and install the required libraries manually (5).
 
     * a) Create a conda environment including all dependencies with 
@@ -77,8 +76,7 @@ or start with an empty environment (3b) and install the required libraries manua
 5. Install packages (only required together with 3b): 
     * If you successfully created your environment from the `environment.yml` file (3a), this step 5 can be skipped. 
     * If you started with your own environment (3b), continue by installing the following libraries: 
-
-        
+   
     
         `conda install pandas`
     
@@ -113,7 +111,7 @@ If you make use of the `CPrecalibration_manuscript_SI` notebook, please cite:
         Johannes Kirchmair,
         Miriam Mathea,
         Volkamer Andrea},
-    title = {Studying and mitigating the effects of data drifts on ML model performance the example of chemical toxicity data},
+    title = {Studying and mitigating the effects of data drifts on ML model performance at the example of chemical toxicity data},
     journal = {manuscript in preparation}
 }
 ```
