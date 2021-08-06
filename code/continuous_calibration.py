@@ -10,29 +10,11 @@ import numpy as np
 import random
 import copy
 
-# import logging
-# import json
-# import sys
-# from collections import OrderedDict
-# from types import GeneratorType
-#
-# import sklearn
-# from sklearn.ensemble import RandomForestClassifier
-# from sklearn.neighbors import KNeighborsRegressor, _kd_tree
+
 from sklearn.model_selection import StratifiedShuffleSplit, StratifiedKFold
 
-# from sklearn.base import clone
-# from sklearn.tree._classes import DecisionTreeClassifier
-# from nonconformist.base import ClassifierAdapter, RegressorAdapter
 from nonconformist.icp import IcpClassifier
 
-# from nonconformist.nc import (
-#     InverseProbabilityErrFunc,
-#     MarginErrFunc,
-#     NcFactory,
-#     ClassifierNc,
-#     RegressorNormalizer,
-# )
 import matplotlib.pyplot as plt
 
 # --------------------------------
@@ -62,7 +44,7 @@ class Sampler:
 
         """
         y = labels
-        return self._gen_samples(y)  # values are in form of array
+        return self._gen_samples(y)  # Values are in form of array
 
     def _balance(self, y_idx, idx, ratio=1.0):
         # Mask to distinguish compounds of inactive and active class of dataset
@@ -127,7 +109,6 @@ class StratifiedRatioSampler(Sampler):
         for i, (train, test) in enumerate(
             sss.split(X=np.zeros(len(y)), y=y)
         ):  # np.zeros used as a placeholder for X
-            # print('test', test)
             yield i, train, test
 
     @property
@@ -303,9 +284,7 @@ class InductiveConformalPredictor(IcpClassifier):
             p is a boolean array denoting which labels are included in the
             prediction sets.
         """
-        # TODO: if x == self.last_x ...
-        # fixme: When predicting whole datasets, the value from random.uniform in smoothing (calc_p) will change.
-        # however, will it be a problem when single instances are predicted?
+
         np.random.seed(self.random_state)
         n_test_objects = x.shape[0]
         p = np.zeros((n_test_objects, self.classes.size))
@@ -344,10 +323,6 @@ class InductiveConformalPredictor(IcpClassifier):
             test_class = np.zeros(x.shape[0], dtype=self.classes.dtype)
             test_class.fill(c)
 
-            # TODO: maybe calculate p-values using cython or similar
-            # TODO: interpolated p-values
-
-            # TODO: nc_function.calc_nc should take X * {y1, y2, ... ,yn}
             test_nc_scores = self.nc_function.score(x, test_class)
             for j, nc in enumerate(test_nc_scores):
                 cal_scores = self.cal_scores[self.condition((x[j, :], c))][::-1]
@@ -494,9 +469,9 @@ class AggregatedConformalPredictor(BaseConformalPredictorAggregator):
     def _f(predictor, X):
         return predictor.predict(X, None)
 
-    def _predict(self, X_score=None):
+    def _predict(self, X_test=None):
         predictions = np.dstack(
-            [self._f(p, X_score) for p in self.predictors_calibrated]
+            [self._f(p, X_test) for p in self.predictors_calibrated]
         )
         predictions = self.agg_func(predictions, axis=2)
 
@@ -522,8 +497,6 @@ class ContinuousCalibrationAggregatedConformalPredictor(AggregatedConformalPredi
     def _fit_calibrate(
         self, X_train=None, y_train=None,
     ):
-        # todo: do we want to save known labels within this method, i.e. y_score?
-        # todo: are indices of p_train and cal saved - do we need to save them??
 
         self.predictors_fitted.clear()
         self.predictors_calibrated.clear()
@@ -532,12 +505,12 @@ class ContinuousCalibrationAggregatedConformalPredictor(AggregatedConformalPredi
         for loop, p_train, cal in samples:  # e.g. 20 loops
             predictor = copy.deepcopy(self.predictor)
 
-            # fit
+            # Fit
             predictor.train_index = p_train
             predictor.fit(X_train[p_train, :], y_train[p_train])
             self.predictors_fitted.append(predictor)
 
-            # calibrate (no update)
+            # Calibrate (no update)
             predictor_calibration = copy.deepcopy(predictor)
             predictor_calibration.calibrate(X_train[cal, :], y_train[cal])
             self.predictors_calibrated.append(predictor_calibration)
@@ -545,9 +518,9 @@ class ContinuousCalibrationAggregatedConformalPredictor(AggregatedConformalPredi
     def calibrate_update(self, X_update, y_update):
         n = 1
         while f"update_{n}" in self.predictors_calibrated_update:
-#             print('n', n)
+
             n += 1
-#         print('final n: ', n)
+
         self.predictors_calibrated_update[f"update_{n}"] = []
         for predictor_fitted in self.predictors_fitted:
             predictor_calibration_update = copy.deepcopy(predictor_fitted)
@@ -560,18 +533,18 @@ class ContinuousCalibrationAggregatedConformalPredictor(AggregatedConformalPredi
     def _f(self, predictor, X):
         return predictor.predict(X, None)
 
-    def _predict(self, X_score=None):
+    def _predict(self, X_test=None):
         predictions = np.dstack(
-            [self._f(p, X_score) for p in self.predictors_calibrated]
+            [self._f(p, X_test) for p in self.predictors_calibrated]
         )
         predictions = self.agg_func(predictions, axis=2)
         return predictions
 
-    def predict_calibrate_update(self, updated_number, X_score=None):
-#         print('updated_number: ', updated_number)
+    def predict_calibrate_update(self, updated_number, X_test=None):
+
         predictions = np.dstack(
             [
-                self._f(p, X_score)
+                self._f(p, X_test)
                 for p in self.predictors_calibrated_update[f"update_{updated_number}"]
             ]
         )
@@ -597,7 +570,7 @@ class CrossValidator:
         self.train_indices = []
         self.test_indices = []
 
-        self._score_names = None
+        self._test_names = None
         self._cv_names = None
 
     def cross_validate(
@@ -606,8 +579,8 @@ class CrossValidator:
         endpoint,
         X_train,
         y_train,
-        X_score,
-        y_score,
+        X_test,
+        y_test,
         class_wise_evaluation=False,
     ):
 
@@ -616,17 +589,17 @@ class CrossValidator:
         self.num_inactives = len(y_train) - num_actives
 
         cv_predictions = []
-        pred_score_predictions = []
+        pred_test_predictions = []
         cv_y_test = []
         predictors = []
 
         cv_evaluations = self._create_empty_evaluations_dict()
-        pred_score_evaluations = self._create_empty_evaluations_dict()
+        pred_test_evaluations = self._create_empty_evaluations_dict()
 
         samples = self.sampler.gen_samples(labels=y_train)
 
         for fold, train, test in samples:
-#             print('fold: ', fold)
+
             self.train_indices.append(list(train))
             self.test_indices.append(list(test))
 
@@ -646,12 +619,12 @@ class CrossValidator:
             # ----------------------------------------------------------
 
             # CV prediction (internal CV test set)
-            cv_prediction = predictor.predict(X_score=X_train[test])
+            cv_prediction = predictor.predict(X_test=X_train[test])
             cv_predictions.append(cv_prediction)
 
-            # Predict (external) score set using predictor with and without updated calibration set
-            pred_score_prediction = predictor.predict(X_score=X_score)
-            pred_score_predictions.append(pred_score_prediction)
+            # Predict (external) test set using predictor with and without updated calibration set
+            pred_test_prediction = predictor.predict(X_test=X_test)
+            pred_test_predictions.append(pred_test_prediction)
 
             cv_evaluations = self._evaluate(
                 cv_prediction,
@@ -663,31 +636,27 @@ class CrossValidator:
                 class_wise=class_wise_evaluation,
             )
 
-            pred_score_evaluations = self._evaluate(
-                pred_score_prediction,
-                y_score,
-                pred_score_evaluations,
+            pred_test_evaluations = self._evaluate(
+                pred_test_prediction,
+                y_test,
+                pred_test_evaluations,
                 endpoint,
                 fold=fold,
                 steps=steps,
                 class_wise=class_wise_evaluation,
             )
-#         print("YSCORE", type(y_score), "++++++++++++++++++++++++++++++++")
-#         print(type(cv_y_test[0]))
+
         self._evaluation_dfs["cv"] = pd.DataFrame(cv_evaluations)
-        self._evaluation_dfs["pred_score"] = pd.DataFrame(pred_score_evaluations)
+        self._evaluation_dfs["pred_test"] = pd.DataFrame(pred_test_evaluations)
 
         self._predictions["cv"] = [cv_predictions, cv_y_test]
-        self._predictions["pred_score"] = [pred_score_predictions, np.tile(y_score, ((fold+1), 1))]
-#         print(type(self._predictions["pred_score"][1]))
-#         print(self._predictions["pred_score"][1])
+        self._predictions["pred_test"] = [pred_test_predictions, np.tile(y_test, ((fold+1), 1))]
 
-        # fixme: is len y_score ok or do need n times y_score?
         self.predictors = predictors
         return pd.DataFrame(cv_evaluations)
 
     def cross_validate_calibrate_update(
-            self, steps, endpoint, X_update, y_update, X_score, y_score,
+            self, steps, endpoint, X_update, y_update, X_test, y_test,
             class_wise_evaluation=False
     ):
         assert self.predictors is not None
@@ -697,15 +666,15 @@ class CrossValidator:
         evaluations = self._create_empty_evaluations_dict()
 
         for fold, predictor in enumerate(predictors):
-#             print('fold: ', fold)
+
             n = predictor.calibrate_update(X_update, y_update)
             cal_update_predictors.append(predictor)
-            prediction = predictor.predict_calibrate_update(n, X_score=X_score)
+            prediction = predictor.predict_calibrate_update(n, X_test=X_test)
             predictions.append(prediction)
 
             evaluations = self._evaluate(
                 prediction,
-                y_score,
+                y_test,
                 evaluations,
                 endpoint,
                 fold=fold,
@@ -713,7 +682,7 @@ class CrossValidator:
                 class_wise=class_wise_evaluation,
             )
         self._evaluation_dfs[f"cal_update_{n}"] = pd.DataFrame(evaluations)
-        self._predictions[f"cal_update_{n}"] = [predictions, np.tile(y_score, ((fold+1), 1))]
+        self._predictions[f"cal_update_{n}"] = [predictions, np.tile(y_test, ((fold+1), 1))]
         self.predictors = cal_update_predictors
 
     @staticmethod
@@ -751,10 +720,6 @@ class CrossValidator:
     def _evaluate(
         prediction, y_true, evaluations, endpoint, fold, steps, class_wise=True
     ):
-        # print("YTRUE", y_true, " ==================================== ")
-        # fixme later 1: currently class-wise evaluation measures are calculated anyways but only saved
-        #  if class_wise is True. Library might be changed, so that they are only calculated if necessary
-        # fixme later 2: validity and error_rate could be calculated using the same method, no need to do this twice
         evaluator = Evaluator(prediction, y_true, endpoint)
         sl = [i / float(steps) for i in range(steps)] + [1]
 
@@ -797,9 +762,9 @@ class CrossValidator:
         )
 
     @property
-    def averaged_evaluation_df_pred_score(self):
+    def averaged_evaluation_df_pred_test(self):
         return self._average_evaluation_df(
-            self._evaluation_dfs["pred_score"], self.num_actives, self.num_inactives
+            self._evaluation_dfs["pred_test"], self.num_actives, self.num_inactives
         )
 
     @property
@@ -859,50 +824,47 @@ class CrossValidator:
         return self._format_predictions_df(self._predictions["cv"], self._cv_names)
 
     @property
-    def pred_score_predictions_df(self):
+    def pred_test_predictions_df(self):
         return self._format_predictions_df(
-            self._predictions["pred_score"], self._score_names
+            self._predictions["pred_test"], self._test_names
         )
 
     @property
     def cal_update_1_predictions_df(self):
         return self._format_predictions_df(
-            self._predictions["cal_update_1"], self._score_names
+            self._predictions["cal_update_1"], self._test_names
         )
 
     @property
     def cal_update_2_predictions_df(self):
         return self._format_predictions_df(
-            self._predictions["cal_update_2"], self._score_names
+            self._predictions["cal_update_2"], self._test_names
         )
 
     @property
     def cal_update_3_predictions_df(self):
         return self._format_predictions_df(
-            self._predictions["cal_update_3"], self._score_names
+            self._predictions["cal_update_3"], self._test_names
         )
 
     @property
     def cal_update_4_predictions_df(self):
         return self._format_predictions_df(
-            self._predictions["cal_update_4"], self._score_names
+            self._predictions["cal_update_4"], self._test_names
         )
 
     @property
     def cal_update_5_predictions_df(self):
         return self._format_predictions_df(
-            self._predictions["cal_update_5"], self._score_names
+            self._predictions["cal_update_5"], self._test_names
         )
 
     @staticmethod
     def _format_predictions_df(predictions, names):
-#         print("FORMATTING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-#         print(len(predictions))
-        # print((predictions[0]))
-#         print("1", type(predictions[1]), (predictions[1]))
+
         pred_dfs = []
         for i, pred in enumerate(predictions[0]):
-#             print(i)
+
             pred_df = pd.DataFrame(data=predictions[0][i])
             pred_df["true"] = predictions[1][i]
             if names is not None:
@@ -937,9 +899,6 @@ class CrossValidator:
         efficiency=True,
     ):
 
-        # print(self._evaluation_df.shape, 'fixme: assert that correct shape!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        # assert self.evaluation_df.shape ==
-
         if class_wise and efficiency:
             evaluation_measures = [
                 "error_rate_0",
@@ -956,9 +915,6 @@ class CrossValidator:
         else:  # not class_wise and not efficiency
             evaluation_measures = ["error_rate"]
 
-        # averaged_evaluation_df = averaged_evaluation_df
-        # print(averaged_evaluation_df)
-
         fig, ax = plt.subplots()
 
         ax.plot([0, 1], [0, 1], "--", linewidth=1, color="black")
@@ -971,17 +927,16 @@ class CrossValidator:
             ax.fill_between(
                 sl, ev_mean - ev_std, ev_mean + ev_std, alpha=0.3, color=colour
             )
-        #
+
         major_ticks = np.arange(0, 101, 20)
         minor_ticks = np.arange(0, 101, 5)
-        #
+
         ax.set_xticks(minor_ticks / 100.0, minor=True)
         ax.set_yticks(major_ticks / 100.0)
         ax.set_yticks(minor_ticks / 100.0, minor=True)
 
-        # ax.set_title(endpoint, fontsize=16)
-        ax.grid(which="minor", linewidth=0.5)  # alpha=0.5)
-        ax.grid(which="major", linewidth=1.5)  # alpha=0.9, linewidth=2.0)
+        ax.grid(which="minor", linewidth=0.5)
+        ax.grid(which="major", linewidth=1.5)
 
         ax.set_xlabel("significance",)
         ax.set_ylabel("error rate")
@@ -989,9 +944,8 @@ class CrossValidator:
         eval_legend.insert(0, "expected_error_rate")
         fig.legend(eval_legend, bbox_to_anchor=(1.25, 0.75))
         plt.title(endpoint)
-        # plt.show()
+
         return plt
-        # plt.savefig(f'../../data/poster_plots/predict_score_{ep}.png')
 
 
 # --------------------------------
@@ -1000,21 +954,20 @@ class CrossValidator:
 
 
 class Evaluator:
-    def __init__(self, y_pred, y_true=None, score_set=None, endpoint=None):
+    def __init__(self, y_pred, y_true=None, test_set=None, endpoint=None):
         if y_true is None:
-            y_true = score_set.measurements[endpoint]
-        # print(y_pred, type(y_pred))
+            y_true = test_set.measurements[endpoint]
+
         y_pred_0 = y_pred[:, 0]
         y_pred_1 = y_pred[:, 1]
         _prediction_df = pd.DataFrame(
             data={"p0": y_pred_0, "p1": y_pred_1, "known_label": y_true}
         )
-        # print(_prediction_df.shape)
+
         _prediction_df = (
             _prediction_df.dropna()
-        )  # fixme: is this necessary? We only consider values == 0.0 and
-        # values == 1.0 anyways
-        # print(_prediction_df.shape)
+        )
+
         self._prediction_df = _prediction_df
         self.endpoint = endpoint
 
@@ -1164,7 +1117,7 @@ class Evaluator:
         )
 
         # Calculate accuracy rate, class-wise and for all compounds
-        # todo: how to handle division by zero??
+
         accuracy_rate_0 = (
             round(accuracy_0 / efficiency_0, 3) if efficiency_0 != 0 else 0
         )
@@ -1183,8 +1136,7 @@ class Evaluator:
         }
 
     def calibration_plot(self, steps):
-        # fixme: I am not sure yet, if this method should live here
-        # todo: include class-wise evaluation
+
         validities_tot = [
             self.calculate_validity(i / float(steps))["validity"] for i in range(steps)
         ] + [self.calculate_validity(1)["validity"]]
@@ -1194,7 +1146,6 @@ class Evaluator:
             for i in range(steps)
         ] + [self.calculate_efficiency(1)["efficiency"]]
         sl = [i / float(steps) for i in range(steps)] + [1]
-        # print(sl)
 
         fig, ax = plt.subplots()
 

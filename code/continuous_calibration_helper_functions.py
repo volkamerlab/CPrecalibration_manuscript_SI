@@ -96,7 +96,7 @@ def load_data_per_endpoint_incl_year(
     data = pd.read_csv(data_path, header=0, index_col=None)
 
     data = data[data[endpoint] != -1]
-    # Some measurements don't have e year annotation, so they are dropped
+    # Some measurements don't have a year annotation, so they are dropped
     if year is True:
         data = data.dropna(subset=["year"])
     # Get descriptors (X)
@@ -134,7 +134,7 @@ def load_data_per_endpoint_incl_year(
             1649,
             1654,
             1853,
-        ]  # fixme: replace with correct number
+        ]
     elif descriptors == "bio":
         columns = [
             col
@@ -143,8 +143,7 @@ def load_data_per_endpoint_incl_year(
         ]
         # col lengths for [chembl, mnt, liver, chembl220/4078, chembl5763, chembl206/2039, chembl279, chembl230,
         # chembl340, chembl240, chembl222, chembl228]
-        print("len bio", len(columns))
-        assert len(columns) in [748, 694, 707, 679, 681, 676, 660, 672, 697, 687, 689, 690, 675]  # fixme: replace with correct number
+        assert len(columns) in [748, 694, 707, 679, 681, 676, 660, 672, 697, 687, 689, 690, 675]
     elif descriptors == "chembio":
         columns = [
             col
@@ -160,7 +159,7 @@ def load_data_per_endpoint_incl_year(
         ]
         print(endpoint, len(columns))
         # col lengths for [chembl, mnt, liver]
-        assert len(columns) in [2919, 2787, 2700, 2495, 2384, 2557, 2571, 2400, 2783, 2795, 2244, 2338, 2344, 2528, 2788, 2701]  # fixme: replace with correct number
+        assert len(columns) in [2919, 2787, 2700, 2495, 2384, 2557, 2571, 2400, 2783, 2795, 2244, 2338, 2344, 2528, 2788, 2701]
     else:
         columns = None
         logger.error("not implemented yet")
@@ -305,7 +304,6 @@ def prepare_rf_acp(
 
 
 def get_X_y_from_df(chembl_df):
-    # fixme: where is this helper function actually used? It uses morgan, which we don't use for the chembl datasets...?
     """
     get X (morgan descriptors) and y (labels) from a dataframe
     Parameters
@@ -493,12 +491,9 @@ def draw_calibration_plot_more_endpoints(
     endpoints,
     strat,
     eval_dfs,
-    # path,
     colours=("blue", "darkred", "deepskyblue", "lightcoral"),
     class_wise=True,
     efficiency=True,
-    # ncols=4,
-    # nrows=3,
     title_name=None,
 ):
     """
@@ -523,7 +518,6 @@ def draw_calibration_plot_more_endpoints(
 
     plt.clf()
     fig, axs = plt.subplots(ncols=n_cols, nrows=n_rows)
-    # fixme: change figheight if only 1 row!! (1 col)
     fig.set_figheight(15)
     fig.set_figwidth(20)
 
@@ -544,7 +538,6 @@ def draw_calibration_plot_more_endpoints(
     eval_legend.insert(0, "expected_error_rate")
 
     for i, endpoint in enumerate(endpoints):
-        # eval_df = pd.read_csv(f"{path}{endpoint}_averaged_eval_df_{strategy}.csv")
         eval_df = eval_dfs[i]
 
         if n_rows > 1:
@@ -566,10 +559,10 @@ def draw_calibration_plot_more_endpoints(
             axs[xax, yax].set_yticks(major_ticks / 100.0)
             axs[xax, yax].set_yticks(minor_ticks / 100.0, minor=True)
 
-            axs[xax, yax].grid(which="minor", linewidth=0.5)  # alpha=0.5)
+            axs[xax, yax].grid(which="minor", linewidth=0.5)
             axs[xax, yax].grid(
                 which="major", linewidth=1.5
-            )  # alpha=0.9, linewidth=2.0)
+            )
 
             axs[xax, yax].set_title(endpoint, fontsize=16)
             axs[xax, yax].set_xlabel("significance")
@@ -600,8 +593,8 @@ def draw_calibration_plot_more_endpoints(
             axs[yax].set_yticks(major_ticks / 100.0)
             axs[yax].set_yticks(minor_ticks / 100.0, minor=True)
 
-            axs[yax].grid(which="minor", linewidth=0.5)  # alpha=0.5)
-            axs[yax].grid(which="major", linewidth=1.5)  # alpha=0.9, linewidth=2.0)
+            axs[yax].grid(which="minor", linewidth=0.5)
+            axs[yax].grid(which="major", linewidth=1.5)
 
             axs[yax].set_title(endpoint, fontsize=16)
             axs[yax].set_xlabel("significance")
@@ -619,9 +612,9 @@ def draw_calibration_plot_more_endpoints(
     return plt, lgd
 
 
-mini_size = 8  # 12
-small_size = 10  # 14
-medium_size = 10  # 16
+mini_size = 8
+small_size = 10
+medium_size = 10
 
 
 def boxplot_val_eff_acc_quer(
@@ -993,12 +986,10 @@ def get_time_split_dict(
     datasets = ["update1", "test"]
     if train_threshold:
         datasets.insert(0, "train")
-    # fixme: what happens if we have no train, but an update2? order??
     if update2_threshold:
         datasets.insert(2, "update2")
         print(datasets)
 
-    # time_split_dict = {id: [], "target_name": []}
     time_split_dict = {}
 
     for k, v in count_dict.items():
@@ -1157,8 +1148,6 @@ def plot_umap(embedding, endpoint,
 
     plt.xticks(size=16)
     plt.yticks(size=16)
-    #     plt.rc('ytick', labelsize=small_size)
-    #     plt.rc('legend', fontsize=small_size)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 
     markers = [plt.Line2D([0, 0], [0, 0], color=colour, marker='o', linestyle='') for colour in umap_colours]
@@ -1221,7 +1210,6 @@ def draw_line_plot_more_datasets(
     plt.rc("ytick", labelsize=7)
     plt.rc("legend", fontsize=7)
     fig, axs = plt.subplots(ncols=n_cols, nrows=n_rows)
-    # fixme: change figheight if only 1 row!! (1 col)
     fig.set_figheight(cm2inch(figsize[0]))
     fig.set_figwidth(cm2inch(figsize[1]))
 
@@ -1229,7 +1217,6 @@ def draw_line_plot_more_datasets(
     yax = 0
 
     eval_legend = evaluation_measures.copy()
-    #     eval_legend.insert(0, "expected_error_rate")
 
     for i, dataset in enumerate(datasets):
 
@@ -1264,12 +1251,6 @@ def draw_line_plot_more_datasets(
 
             axs[xax, yax].set_xticklabels(strategies, rotation=90)
             axs[xax, yax].set_ylim(0.0, 1.0)
-            # axs[xax, yax].legend(
-            #     evaluation_measures, loc="upper right", bbox_to_anchor=(1.5, 1)
-            # )
-            # axs[xax, yax].legend(
-            #     evaluation_measures, loc="upper right", bbox_to_anchor=(1.2, 1)
-            # )
             title = f"{dataset}, {num_actives[i]} actives, {num_inactives[i]} inactives"
             axs[xax, yax].set_title(title, fontsize=7)
 
@@ -1291,21 +1272,16 @@ def draw_line_plot_more_datasets(
 
             axs[yax].set_xticklabels(strategies, rotation=90)
             axs[yax].set_ylim(0.0, 1.0)
-            # axs[yax].legend(
-            #     evaluation_measures, loc="upper right", bbox_to_anchor=(1.5, 1)
-            # )
             title = f"{dataset}, {num_actives[i]} actives, {num_inactives[i]} inactives"
             print("title", title)
             axs[yax].set_title(title, fontsize=10)
 
             yax += 1
 
-    # lgd = fig.legend(eval_legend, loc="center left", bbox_to_anchor=(1, 0.47))
-    # lgd = fig.legend(eval_legend, loc="center left", bbox_to_anchor=(2, 0.5))
     lgd = fig.legend(eval_legend, loc='upper center', bbox_to_anchor=(0.51, 0.05), ncol=5, columnspacing=0.9,
                      numpoints=3)
-    # plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.tight_layout(rect=[0, 0.03, 0.9, 0.95]) #, w_pad=2.)
+
+    plt.tight_layout(rect=[0, 0.03, 0.9, 0.95])
     fig.suptitle(
         f"{descriptors} descriptors, {', '.join(evaluation_measures)}", fontsize=10
     )
@@ -1391,7 +1367,7 @@ def columns_per_descriptor(input_columns, descriptors, chembl_id):
             and (col != "molecule_chembl_id")
         ]
         print(len(output_columns))
-        assert len(output_columns) == 2171  # fixme: replace with correct number
+        assert len(output_columns) == 2171
     elif descriptors == "bio":
         output_columns = [
             col
@@ -1399,7 +1375,7 @@ def columns_per_descriptor(input_columns, descriptors, chembl_id):
             if (col.startswith("p0-")) or (col.startswith("p1-"))
         ]
         print(len(output_columns))
-        assert len(output_columns) == 746  # fixme: replace with correct number
+        assert len(output_columns) == 746
     elif descriptors == "chembio":
         output_columns = [
             col
@@ -1453,7 +1429,7 @@ def plot_umap_more_datasets(
 
     plt.clf()
     fig, axs = plt.subplots(ncols=n_cols, nrows=n_rows)
-    # fixme: change figheight if only 1 row!! (1 col)
+
     fig.set_figheight(figsize[0])
     fig.set_figwidth(figsize[1])
 
