@@ -1,4 +1,10 @@
 """
+This script is part of the supporting information to the manuscript entitled
+"Studying and mitigating the effects of data drifts on ML model performance at the example of chemical toxicity data"
+Andrea Morger, Marina Garcia de Lomana, Ulf Norinder, Fredrik Svensson, Johannes Kirchmair, Miriam Mathea, and Andrea
+Volkamer
+It was last updated in August 2021.
+
 Conformal Prediction
 
 Parts of this code are taken from https://github.com/donlnz/nonconformist/blob/master/nonconformist/acp.py
