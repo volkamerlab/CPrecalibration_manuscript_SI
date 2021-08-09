@@ -2,7 +2,7 @@
 
 This repository is part of the supporting information to the manuscript in preparation:
 
-** Studying and mitigating the effects of data drifts on ML model performance at the example of chemical toxicity data **
+**Studying and mitigating the effects of data drifts on ML model performance at the example of chemical toxicity data**
 
 Andrea Morger, Marina Garcia de Lomana, Ulf Norinder, Fredrik Svensson, Johannes Kirchmair, Miriam Mathea, and Andrea Volkamer
 
@@ -12,28 +12,29 @@ Andrea Morger, Marina Garcia de Lomana, Ulf Norinder, Fredrik Svensson, Johannes
 * [Data and Methods](#data-and-methods)
 * [Usage](#usage)
 * [License](#license)
-* [Acknowledgement](#acknowledgement)
 * [Citation](#citation)
 
 ## Objective
 (Back to [Table of contents](#table-of-contents))
 
-[todo] As modelling strategy, the concept of conformal prediction will be further investigated, with special focus on applicability domain definition. 
-A strategy to continuously update models to make reliable predictions for novel data (as in time series) is introduced. 
+In this work, a strategy to recalibrate conformal prediction models to mitigate the effects of data drifts was presented. 
+The strategy was evaluated for temporal data drifts (between time-split ChEMBL datasets) as well as for the mitigation of data drifts between internal and external data. 
 
-### Folder Structure
-(Back to [Table of contents](#table-of-contents))
-- data: input data for ChEMBL228
-- scripts: python scripts and example jupyter notebooks
-Note that due to the size of the ChEMBL datasets with the chembio descriptors, only one dataset is provided with this GitHub repo. This is sufficient to run the `continuous_calibration_example` notebook. To be able to run both example notebooks, download the compressed file with data for all ChEMBL endpoints used in this work from Zenodo.
+This repository illustrates how the recalibration strategy is applied at the example of ChEMBL datasets.
+
+* Notebook `1_continuous_calibration_example.ipynb` explains the recalibration concept and application at the example of endpoint `ChEMBL228`. The notebook can also be adapted to be used for other ChEMBL endpoints or your own data
+* Notebook `2_continuous_calibration_evaluate_multiple_endpoints.ipynb` shows how the recalibration experiments can be performed for all 12 ChEMBL endpoints used in the manuscript. The notebook can also be customised to build CP models and make predictions for your own data.
+
+
+- Data: input data for ChEMBL228. Note that due to the size of the ChEMBL datasets with the chembio descriptors, only one dataset is provided with this GitHub repo. This is sufficient to run the `continuous_calibration_example` notebook. To be able to run both example notebooks, download the compressed file with data for all ChEMBL endpoints used in this work from Zenodo under this [link](link_to_zenodo).
 
 
 ## Data and Methods
 (Back to [Table of contents](#table-of-contents))
 
-The ChEMBL datasets used in these notebooks were downloaded from the ChEMBL database version 26
+The ChEMBL datasets used in these notebooks were downloaded from the ChEMBL database version 26.
 
-* The molecules were standardised as described in the manuscript (*Data and Methods*) in a KNIME workflow
+* The molecules were standardised as described in the manuscript (*Data and Methods*) in a KNIME workflow including the following steps
     * Remove solvents and salts
     * Annotate aromaticity
     * Neutralise charges
