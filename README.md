@@ -25,8 +25,8 @@ This repository focuses on the ChEMBL data and illustrates how the recalibration
 * Notebook `1_continuous_calibration_example.ipynb` explains the recalibration concept and application at the example of endpoint `ChEMBL228`. The notebook can easily be adapted to be used for the other provided ChEMBL data sets or your own data.
 * Notebook `2_continuous_calibration_evaluate_multiple_endpoints.ipynb` shows how the recalibration experiments can be performed at once for all 12 ChEMBL endpoints as used in the manuscript. The notebook can also be customised to build CP models and make predictions for your own data.
 
-* Data: The data folder contains the input data for the `ChEMBL228` calculations. The file contains the molecule chembl IDs, SMILES, binary activity, publication year, and ChemBio descriptors. 
-Note that due to the size of the datasets with the chembio descriptors, only one dataset is provided with this GitHub repo. This is sufficient to run the `continuous_calibration_example.ipynb` notebook. To be able to run the full pipeline, please download the compressed file with data for all 12 endpoints used in this work from Zenodo under this [link](link_to_zenodo).
+* Data: The data folder contains the input data for the `ChEMBL228` calculations. The file contains the molecule ChEMBL IDs, SMILES, binary activity, publication year, and ChemBio descriptors. 
+Note that due to the size of the datasets with the ChemBio descriptors, only one dataset is provided with this GitHub repo. This is sufficient to run the `continuous_calibration_example.ipynb` notebook. To be able to run the full pipeline, please download the compressed file with data for all 12 endpoints used in this work from Zenodo under this [link](link_to_zenodo).
 
 
 ## Data and Methods
@@ -40,12 +40,12 @@ The ChEMBL datasets used in these notebooks were downloaded from the ChEMBL data
     * Neutralise charges
     * Mesomerise structures 
     * Remove duplicates
-* For each molecule the folowwing information is stored:
+* For each molecule the following information is stored:
     * molecule chembl ID
     * SMILES
     * binary activity (i.e. 1 if measured active, 0 if measured inactive in the respective assay)
     * publication year
-    * ChemBio descriptors (calulated as described in [Garcia de Lomana et al., JCIM, 2021, 61, 7, 3255–3272](https://pubs.acs.org/doi/10.1021/acs.jcim.1c00451)).
+    * ChemBio descriptors (calculated as described in [Garcia de Lomana et al., JCIM, 2021, 61, 7, 3255–3272](https://pubs.acs.org/doi/10.1021/acs.jcim.1c00451)).
     
 
 ## Usage
