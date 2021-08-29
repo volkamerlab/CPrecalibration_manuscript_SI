@@ -1091,7 +1091,7 @@ def draw_scatter_plot_one_endpoint(
                 marker=marker_styles[m]
             )
 
-        plt.hlines(0.8, 0, 2, linestyle="dashed")
+        plt.hlines(0.8, 0, 3, linestyle="dashed")
         plt.xticks(np.arange(len(labels)), labels=labels, rotation=30, ha="right")
         plt.ylim(-0.05, 1.05)
 
