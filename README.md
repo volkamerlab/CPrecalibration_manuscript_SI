@@ -26,7 +26,7 @@ This repository focuses on the ChEMBL data and illustrates how the recalibration
 * Notebook `2_continuous_calibration_evaluate_multiple_endpoints.ipynb` shows how the recalibration experiments can be performed at once for all 12 ChEMBL endpoints as used in the manuscript. The notebook can also be customised to build CP models and make predictions for your own data.
 
 * Dataset `CHEMBL228_chembio_normalizedDesc.csv.tar.bz2` contains the input data for the `ChEMBL228` calculations. The file contains the molecule ChEMBL IDs, SMILES, binary activity, publication year, and ChemBio descriptors. 
-Note that due to the size of the datasets with the ChemBio descriptors, only one dataset is provided with this GitHub repo. This is sufficient to run the `continuous_calibration_example.ipynb` notebook. To be able to run the full pipeline, please download the compressed file with data for all 12 endpoints used in this work from Zenodo under this [link](link_to_zenodo) and copy it to the data folder.
+Note that due to the size of the datasets with the ChemBio descriptors, only one dataset is provided with this GitHub repo. This is sufficient to run the `continuous_calibration_example.ipynb` notebook. To be able to run the full pipeline, please download the compressed file with data for all 12 endpoints used in this work from Zenodo under this [link](https://zenodo.org/record/5167636) and copy it to the data folder.
 * Dataset `data_size_chembio_chembl.csv` holds the precalculated information which year is used per data set to create the time split data while retaining specific ratios. It contains the information for all 12 endpoints, wich will be connected to the data in the notebooks. See the manuscript for details on the data splitting.
 
 ## Data and Methods
