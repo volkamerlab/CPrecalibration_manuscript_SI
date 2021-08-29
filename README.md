@@ -25,9 +25,9 @@ This repository focuses on the ChEMBL data and illustrates how the recalibration
 * Notebook `1_continuous_calibration_example.ipynb` explains the recalibration concept and application at the example of endpoint `ChEMBL228`. The notebook can easily be adapted to be used for the other provided ChEMBL data sets or your own data.
 * Notebook `2_continuous_calibration_evaluate_multiple_endpoints.ipynb` shows how the recalibration experiments can be performed at once for all 12 ChEMBL endpoints as used in the manuscript. The notebook can also be customised to build CP models and make predictions for your own data.
 
-* Data: The data folder contains the input data for the `ChEMBL228` calculations. The file contains the molecule ChEMBL IDs, SMILES, binary activity, publication year, and ChemBio descriptors. 
-Note that due to the size of the datasets with the ChemBio descriptors, only one dataset is provided with this GitHub repo. This is sufficient to run the `continuous_calibration_example.ipynb` notebook. To be able to run the full pipeline, please download the compressed file with data for all 12 endpoints used in this work from Zenodo under this [link](link_to_zenodo).
-
+* Dataset `CHEMBL228_chembio_normalizedDesc.csv.tar.bz2` contains the input data for the `ChEMBL228` calculations. The file contains the molecule ChEMBL IDs, SMILES, binary activity, publication year, and ChemBio descriptors. 
+Note that due to the size of the datasets with the ChemBio descriptors, only one dataset is provided with this GitHub repo. This is sufficient to run the `continuous_calibration_example.ipynb` notebook. To be able to run the full pipeline, please download the compressed file with data for all 12 endpoints used in this work from Zenodo under this [link](link_to_zenodo) and copy it to the data folder.
+* Dataset `data_size_chembio_chembl.csv` holds the precalculated information which year is used per data set to create the time split data while retaining specific ratios. It contains the information for all 12 endpoints, wich will be connected to the data in the notebooks. See the manuscript for details on the data splitting.
 
 ## Data and Methods
 (Back to [Table of contents](#table-of-contents))
@@ -46,7 +46,8 @@ The ChEMBL datasets used in these notebooks were downloaded from the ChEMBL data
     * binary activity (i.e. 1 if measured active, 0 if measured inactive in the respective assay)
     * publication year
     * ChemBio descriptors (calculated as described in [Garcia de Lomana et al., JCIM, 2021, 61, 7, 3255–3272](https://pubs.acs.org/doi/10.1021/acs.jcim.1c00451)).
-    
+
+Recalibration of conformal prediction models provides a strategy to mitigate effects of data drifts between training and test data. Instead of updating and retrainining a conformal prediction model, it suggests to only update the calibration set with new data, that are closer to the test set (than the original calibration data). For more information on conformal prediction and the recalibration strategy, we refer to the manuscript or to our previous work ([Morger et al., JCheminf, 2021, 13, 35](https://link.springer.com/article/10.1186/s13321-021-00511-5)).
 
 ## Usage
 (Back to [Table of contents](#table-of-contents))
@@ -58,7 +59,6 @@ The notebook may be adapted to use the code for different datasets.
 ### Installation
 
 1. Get your local copy of the `CPrecalibration_manuscript_si` repository by:
-    * Downloading it as a [Zip archive](https://github.com/volkamerlab/cprecalibration_manuscript_si/archive/master.zip) and unzipping it, or
     * Cloning it to your computer using git
 
     ```
@@ -79,6 +79,8 @@ or start with an empty environment (3b) and install the required libraries manua
    
 
 4. Activate the conda environment: `conda activate recalibration_si`
+
+If you created your conda environment from the `environment.yml` file provided with this repository, it is now ready to be used with the notebooks. If you are building your own environment, continue with step 5 to install the required packages.
 
 5. Install packages (only required together with 3b): 
     * If you successfully created your environment from the `environment.yml` file (3a), this step 5 can be skipped. 
