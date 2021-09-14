@@ -26,13 +26,13 @@ This repository focuses on the ChEMBL data and illustrates how the recalibration
 * Notebook `2_continuous_calibration_evaluate_multiple_endpoints.ipynb` shows how the recalibration experiments can be performed at once for all 12 ChEMBL endpoints as used in the manuscript. The notebook can also be customised to build CP models and make predictions for your own data.
 
 * Dataset `CHEMBL228_chembio_normalizedDesc.csv.tar.bz2` contains the input data for the `ChEMBL228` calculations. The file contains the molecule ChEMBL IDs, SMILES, binary activity, publication year, and ChemBio descriptors. 
-Note that due to the size of the datasets with the ChemBio descriptors, only one dataset is provided with this GitHub repo. This is sufficient to run the `continuous_calibration_example.ipynb` notebook. To be able to run the full pipeline, please download the compressed file with data for all 12 endpoints used in this work from Zenodo under this [link](https://zenodo.org/record/5167636) and copy it to the data folder.
+Note that due to the size of the datasets with the ChemBio descriptors, only one dataset is provided with this GitHub repo. This is sufficient to run the `1_continuous_calibration_example.ipynb` notebook. To be able to run the full pipeline, please download the compressed file with data for all 12 endpoints used in this work from Zenodo under this [link](https://zenodo.org/record/5167636) and copy it to the data folder.
 * Dataset `data_size_chembio_chembl.csv` holds the precalculated information which year is used per data set to create the time split data while retaining specific ratios. It contains the information for all 12 endpoints, wich will be connected to the data in the notebooks. See the manuscript for details on the data splitting.
 
 ## Data and Methods
 (Back to [Table of contents](#table-of-contents))
 
-The ChEMBL datasets used in these notebooks were downloaded from the ChEMBL database version 26.
+The **ChEMBL datasets** used in these notebooks were downloaded from the ChEMBL database version 26.
 
 * The molecules were standardised as described in the manuscript (*Data and Methods*) in a KNIME workflow including the following steps
     * Remove solvents and salts
@@ -41,11 +41,13 @@ The ChEMBL datasets used in these notebooks were downloaded from the ChEMBL data
     * Mesomerise structures 
     * Remove duplicates
 * For each molecule the following information is stored:
-    * molecule chembl ID
+    * Molecule chembl ID
     * SMILES
-    * binary activity (i.e. 1 if measured active, 0 if measured inactive in the respective assay)
-    * publication year
+    * Binary activity (i.e. 1 if measured active, 0 if measured inactive in the respective assay)
+    * Publication year
     * ChemBio descriptors (calculated as described in [Garcia de Lomana et al., JCIM, 2021, 61, 7, 3255–3272](https://pubs.acs.org/doi/10.1021/acs.jcim.1c00451)).
+
+**Conformal prediction, data drifts and recalibration** 
 
 Recalibration of conformal prediction models provides a strategy to mitigate effects of data drifts between training and test data. Instead of updating and retrainining a conformal prediction model, it suggests to only update the calibration set with new data, that are closer to the test set (than the original calibration data). For more information on conformal prediction and the recalibration strategy, we refer to the manuscript or to our previous work ([Morger et al., JCheminf, 2021, 13, 35](https://link.springer.com/article/10.1186/s13321-021-00511-5)).
 
