@@ -778,6 +778,170 @@ def boxplot_and_df_for_eval_measure(
         )
 
 
+def draw_scatter_plot_more_datasets(
+    evaluation_dfs_per_dataset,
+    datasets,
+    evaluation_measures,
+    colours=("navy", "green", "plum"),
+    marker_styles=("o", "x", "+", "v"),
+    figsize=(7.5, 7.5),
+    significance_level=0.2,
+):
+    """
+    Create a scatter plot in form of subplots for multiple datasets. Select a list of evaluation measures to be plotted in
+    each subplot/per dataset
+
+    Parameters
+    ----------
+    marker_styles
+    evaluation_dfs_per_dataset:
+        A dict containing as keys the datasets and as values a dict
+        containing as keys the strategy/experiment and as value the coresponding evaluation_df
+    datasets: list
+        dataset names
+    descriptors:
+        type of descriptors used for experiment, i.e chem, bio or chembio
+    evaluation_measures:
+        evaluation measures to be included in the plot
+    line_plots_path:
+        path to save plots
+    colours:
+        colours for lines
+    figsize:
+        size of complete plot
+    significance_level:
+        significance level, at which the evaluation should be performed/plotted
+
+    Returns
+    -------
+
+    """
+    n_cols, n_rows = calc_n_cols_n_rows(len(datasets))
+
+    plt.clf()
+    plt.rc("xtick", labelsize=12)
+    plt.rc("ytick", labelsize=12)
+    plt.rc("legend", fontsize=12)
+    fig, axs = plt.subplots(ncols=n_cols, nrows=n_rows)
+    fig.set_figheight(cm2inch(figsize[0]))
+    fig.set_figwidth(cm2inch(figsize[1]))
+
+    xax = 0
+    yax = 0
+
+    measures_map_dict = {"validity_bal": "balanced validity", "efficiency_bal": "balanced efficiency",
+                         "accuracy_bal": "balanced accuracy",
+                         "validity_0": "validity\n inactive class", "efficiency_0": "efficiency\n inactive class",
+                         "accuracy_0": "accuracy\n inactive class", "validity_1": "validity\n active class",
+                         "efficiency_1": "efficiency\n active class", "accuracy_1": "accuracy\n active"}
+    eval_legend = []
+    for em in evaluation_measures:
+        if em in measures_map_dict.keys():
+            eval_legend.append(measures_map_dict[em])
+        else:
+            eval_legend.append(em)
+
+    for i, dataset in enumerate(datasets):
+
+        dataset_evaluation_dfs = evaluation_dfs_per_dataset[dataset]
+
+        # Prepare data for plot, i.e. eval measure for each strategy
+        measure_dict_sl = {}
+        measure_dict_sl["strategies"] = []
+        for meas in evaluation_measures:
+            measure_dict_sl[meas] = []
+
+        for strategy, df in dataset_evaluation_dfs.items():
+            measure_dict_sl["strategies"].append(strategy)
+            df = df[0]
+            df_sl = df[df["significance_level"] == significance_level]
+            for meas in evaluation_measures:
+                measure_dict_sl[meas].append(df_sl[f"{meas} mean"].values)
+
+        strategies = measure_dict_sl["strategies"]
+
+        labels_map_dict = {"cv_original": "cv",
+                           "original": "cal_original",  # pred_holdout\n
+                           "update": "iii",
+                           "update1": "cal_update1",  # pred_holdout\n
+                           "update2": "cal_update2",  # pred_holdout\n
+                           "update12": "cal_update1_and_2",  # pred_holdout\n
+                          }
+
+        labels = [labels_map_dict[l] for l in strategies]
+
+        if n_rows > 1:
+
+
+            for m, meas in enumerate(evaluation_measures):
+                axs[xax, yax].scatter(
+                    strategies,
+                    measure_dict_sl[meas],
+                    color=colours[m],
+                    marker=marker_styles[m]
+                )
+
+            axs[xax, yax].hlines(0.8, 0, 4, linestyle="dashed")
+            axs[xax, yax].set_xticklabels(labels, rotation=30, ha="right")
+            axs[xax, yax].set_ylim(-0.05, 1.05)
+           
+            title = f"{dataset}"
+            axs[xax, yax].set_title(title, fontsize=14)#2)
+
+            xax += 1
+            if xax == n_rows:
+                xax = 0
+                yax += 1
+
+        else:
+            axs[yax].hlines(0.8, 0, 9, linestyle="dashed")
+
+            for m, meas in enumerate(evaluation_measures):
+                axs[yax].scatter(
+                    strategies,
+                    measure_dict_sl[meas],
+                    color=colours[m],
+                    marker=marker_styles[m],
+                )
+
+            axs[yax].set_xticklabels(labels, rotation=30, ha="right")
+            axs[yax].set_ylim(-0.05, 1.05)
+        
+            title = f"{dataset}"
+            print("title", title)
+            axs[yax].set_title(title, fontsize=14)#2)
+
+            yax += 1
+
+    lgd = fig.legend(eval_legend, loc='upper center', bbox_to_anchor=(0.45, 0.05), ncol=4, columnspacing=0.5,
+                     numpoints=3)
+    plt.tight_layout(rect=[0, 0.03, 0.9, 0.95])
+    fig.suptitle(
+        f"{', '.join(evaluation_measures)}", fontsize=16
+    )
+
+    evaluation_measures = "_".join([em for em in evaluation_measures])
+
+    return plt, lgd
+
+
+def format_dataset_dict(endpoint_dict, evaluation_dfs, strategies):
+    datasets = []  # Save dataframe names in a list
+    for k, v in endpoint_dict.items():
+        datasets.append(k)
+        evaluation_dfs_per_dataset = {}
+        
+    for i, ds in enumerate(datasets):
+
+        evaluation_dfs_per_dataset[ds] = {}
+        for strategy in strategies:
+            evaluation_dfs_per_dataset[ds][strategy] = []
+        for strategy in strategies:
+            evaluation_dfs_per_dataset[ds][strategy].append(
+                evaluation_dfs[strategy][i]
+            )
+    return datasets, evaluation_dfs_per_dataset
+
 # -----------------------------------------------
 # Define threshold for train/update/test datasets
 # -----------------------------------------------
@@ -925,7 +1089,7 @@ def get_time_split_years(
         thresholds_list.insert(0, train_thresh)
     if update2_thresh:
         thresholds_list.append(update2_thresh)
-    # thresholds_list = [train_thresh, update1_thresh, update2_thresh]
+    
     if train_thresh:
         train_dict = {"years": [], "count_act": 0, "count_inact": 0}
     else:
